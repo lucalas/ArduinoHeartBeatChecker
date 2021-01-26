@@ -13,16 +13,18 @@ const int THRESHOLD = 550;   // Adjust this number to avoid noise when idle
 byte samplesUntilReport;
 const byte SAMPLES_PER_SERIAL_SAMPLE = 10;
 WebSocketsClient webSocket;
-byte delayToSend = 1000;
-int lastSend = 0;
+long delayToSend = 500;
+long lastSend = 0;
 
 void setup() {
   Serial.begin(115200);
-  while(!Serial.available());
-  pinMode(A0, INPUT);
+  //while(!Serial.available());
+    Serial.println("Connecting");  
+  pinMode(PULSE_INPUT, INPUT);
   samplesUntilReport = SAMPLES_PER_SERIAL_SAMPLE;
 
   WiFi.begin(ssid, wifiPwd);
+    Serial.println("Connecting");  
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
     delay(1000);
@@ -39,16 +41,13 @@ void setup() {
   if (!pulseSensor.begin()) {
     Serial.println("Error init pulse sensor");
   }
+
+  tryToConnectWS();
 }
 
 void loop() {
 	webSocket.loop();
   if (pulseSensor.sawNewSample()) {
-    /*
-       Every so often, send the latest Sample.
-       We don't print every sample, because our baud rate
-       won't support that much I/O.
-    */
     if (--samplesUntilReport == (byte) 0) {
       samplesUntilReport = SAMPLES_PER_SERIAL_SAMPLE;
 
@@ -59,13 +58,7 @@ void loop() {
         webSocket.sendTXT(data);
         lastSend = millis();
       }
-      //Serial.println(analogRead(A0));
     }
-
-    /*******
-      Here is a good place to add code that could take up
-      to a millisecond or so to run.
-    *******/
   }
 }
 
