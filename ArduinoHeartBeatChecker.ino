@@ -53,7 +53,7 @@ void loop() {
 
       int value = pulseSensor.getBeatsPerMinute();
       if (millis() - lastSend > delayToSend) {
-        String data = "{\"BPM\": " + String(value) + "}";
+        String data = "{\"BPM\": " + String(value) + ", \"value\": " + analogRead(A0) + "}";
         Serial.println(data);
         webSocket.sendTXT(data);
         lastSend = millis();
@@ -63,20 +63,21 @@ void loop() {
 }
 
 void tryToConnectWS() {
-	webSocket.begin("192.168.1.198", 8181, "/");
-	webSocket.setReconnectInterval(5000);
-	// event handler
-	webSocket.onEvent(webSocketEvent);
+  webSocket.begin("192.168.1.198", 8181, "/");
+  webSocket.setReconnectInterval(5000);
+  // event handler
+  webSocket.onEvent(webSocketEvent);
 }
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 
-	switch(type) {
-		case WStype_DISCONNECTED:
-			Serial.printf("[WSc] Disconnected!\n");
-			break;
-		case WStype_CONNECTED: 
-			Serial.printf("[WSc] Connected to url: %s\n", payload);
-			break;
+  switch(type) {
+    case WStype_DISCONNECTED:
+      Serial.printf("[WSc] Disconnected!\n");
+      break;
+    case WStype_CONNECTED: 
+      Serial.printf("[WSc] Connected to url: %s\n", payload);
+      webSocket.sendTXT("{\"type\": \"send_heartbeat\"}");
+      break;
     }
 }
