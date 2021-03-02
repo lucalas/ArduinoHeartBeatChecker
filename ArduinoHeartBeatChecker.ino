@@ -13,7 +13,7 @@ const int THRESHOLD = 550;   // Adjust this number to avoid noise when idle
 byte samplesUntilReport;
 const byte SAMPLES_PER_SERIAL_SAMPLE = 10;
 WebSocketsClient webSocket;
-long delayToSend = 500;
+long delayToSend = 100;
 long lastSend = 0;
 
 void setup() {
